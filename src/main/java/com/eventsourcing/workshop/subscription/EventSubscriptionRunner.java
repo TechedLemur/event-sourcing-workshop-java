@@ -5,6 +5,7 @@ import com.eventsourcing.workshop.clients.EventListener;
 import com.eventsourcing.workshop.clients.StorageClient;
 import com.eventsourcing.workshop.events.CartEvent;
 import com.eventsourcing.workshop.events.ProductEvent;
+import com.eventsourcing.workshop.models.Bucket;
 import com.eventsourcing.workshop.services.CartService;
 import com.eventsourcing.workshop.services.CartServiceV2;
 import com.eventsourcing.workshop.services.ProductServiceV2;
@@ -38,12 +39,12 @@ public class EventSubscriptionRunner implements ApplicationRunner {
 
         Optional<Long> checkpoint = Optional.empty();
         // Fetch the checkpoint from the database
-        checkpoint = storageClient.get("checkpoints", "products");
+        checkpoint = storageClient.get(Bucket.CHECKPOINTS, "products");
 
         logger.info("Starting product subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
             logger.info("No checkpoint found for products bucket, clearing bucket to ensure db state is consistent");
-            storageClient.clearBucket("products");
+            storageClient.clearBucket(Bucket.PRODUCTS);
         }
         EventListener<ProductEvent> listener = new EventListener<>() {
             @Override
@@ -52,7 +53,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 productServiceV2.handleProductEvent(subject, event);
 
                 // Save the checkpoint to the database
-                storageClient.put("checkpoints", "products", revision);
+                storageClient.put(Bucket.CHECKPOINTS, "products", revision);
             }
         };
 
@@ -69,12 +70,12 @@ public class EventSubscriptionRunner implements ApplicationRunner {
 
         Optional<Long> checkpoint = Optional.empty();
         // Fetch the checkpoint from the database
-        checkpoint = storageClient.get("checkpoints", "carts");
+        checkpoint = storageClient.get(Bucket.CHECKPOINTS, "carts");
 
         logger.info("Starting cart subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
             logger.info("No checkpoint found for carts bucket, clearing bucket to ensure db state is consistent");
-            storageClient.clearBucket("carts");
+            storageClient.clearBucket(Bucket.CARTS);
         }
         EventListener<CartEvent> listener = new EventListener<>() {
             @Override
@@ -83,7 +84,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 cartServiceV2.handleCartEvent(subject, event);
 
                 // Save the checkpoint to the database
-                storageClient.put("checkpoints", "carts", revision);
+                storageClient.put(Bucket.CHECKPOINTS, "carts", revision);
             }
         };
 
