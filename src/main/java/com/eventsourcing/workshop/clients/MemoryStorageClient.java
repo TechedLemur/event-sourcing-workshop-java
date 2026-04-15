@@ -3,6 +3,8 @@ package com.eventsourcing.workshop.clients;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.eventsourcing.workshop.models.Bucket;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,14 +14,14 @@ public final class MemoryStorageClient implements StorageClient {
     private final Map<String, Map<String, Object>> buckets = new ConcurrentHashMap<>();
 
     @Override
-    public <T> void put(String bucket, String id, T value) {
-        buckets.computeIfAbsent(bucket, k -> new ConcurrentHashMap<>()).put(id, value);
+    public <T> void put(Bucket<T> bucket, String id, T value) {
+        buckets.computeIfAbsent(bucket.getKey(), k -> new ConcurrentHashMap<>()).put(id, value);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> get(String bucket, String id) {
-        Map<String, Object> m = buckets.get(bucket);
+    public <T> Optional<T> get(Bucket<T> bucket, String id) {
+        Map<String, Object> m = buckets.get(bucket.getKey());
         if (m == null)
             return Optional.empty();
         return Optional.ofNullable((T) m.get(id));
@@ -27,8 +29,8 @@ public final class MemoryStorageClient implements StorageClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> delete(String bucket, String id) {
-        Map<String, Object> m = buckets.get(bucket);
+    public <T> Optional<T> delete(Bucket<T> bucket, String id) {
+        Map<String, Object> m = buckets.get(bucket.getKey());
         if (m == null)
             return Optional.empty();
         return Optional.ofNullable((T) m.remove(id));
@@ -36,8 +38,8 @@ public final class MemoryStorageClient implements StorageClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Collection<T> list(String bucket) {
-        Map<String, Object> m = buckets.get(bucket);
+    public <T> Collection<T> list(Bucket<T> bucket) {
+        Map<String, Object> m = buckets.get(bucket.getKey());
         if (m == null || m.isEmpty())
             return List.of();
 
@@ -45,7 +47,7 @@ public final class MemoryStorageClient implements StorageClient {
     }
 
     @Override
-    public void clearBucket(String bucket) {
-        buckets.remove(bucket);
+    public void clearBucket(Bucket<?> bucket) {
+        buckets.remove(bucket.getKey());
     }
 }
