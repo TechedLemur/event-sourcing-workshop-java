@@ -1,0 +1,36 @@
+services:
+  kurrentdb.db:
+    image: kurrentplatform/kurrentdb:lts
+    # If you are on an ARM machine, you can use the following image:
+    # image: kurrentplatform/kurrentdb:26.0.2-experimental-arm64-10.0-noble
+
+    environment:
+      - KURRENTDB_CLUSTER_SIZE=1
+      - KURRENTDB_RUN_PROJECTIONS=All
+      - KURRENTDB_START_STANDARD_PROJECTIONS=true
+      - KURRENTDB_NODE_PORT=2113
+      - KURRENTDB_INSECURE=true
+      - KURRENTDB_ENABLE_ATOM_PUB_OVER_HTTP=true
+    ports:
+      - "2113:2113"
+    volumes:
+      - type: volume
+        source: kurrentdb-volume-data
+        target: /var/lib/kurrentdb
+      - type: volume
+        source: kurrentdb-volume-logs
+        target: /var/log/kurrentdb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2113/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+  frontend:
+    image: docker.io/theazack9/es-workshop-frontend:0.2.0
+    ports:
+      - "3000:3000"
+
+volumes:
+  kurrentdb-volume-data:
+  kurrentdb-volume-logs:
