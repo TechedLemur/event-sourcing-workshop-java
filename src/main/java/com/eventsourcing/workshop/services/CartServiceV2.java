@@ -17,7 +17,7 @@ public class CartServiceV2 extends CartService {
         this.storageClient = storageClient;
     }
 
-    // Part 2
+    // Part 3
     public void handleCartEvent(String id, CartEvent event) {
         // TODO: Fetch the cart from the database
         // Cart cart = ...
@@ -27,7 +27,7 @@ public class CartServiceV2 extends CartService {
         // TODO: Save the cart to the database
     }
 
-    // Part 2
+    // Part 3
     @Override
     public Optional<Cart> getCart(String id) {
         // TODO: Fetch the cart from the database instead of returning empty
