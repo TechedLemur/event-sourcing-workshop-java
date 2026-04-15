@@ -47,9 +47,10 @@ public class CartService {
 
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
-            CartItemAddedEvent cartItemAddedEvent = null;
+            CartItemAddedV2Event cartItemAddedEvent = null;
             // Create a new CartItemAddedEvent
-            cartItemAddedEvent = new CartItemAddedEvent(itemId, product.getId(), product.getName(), product.getPrice());
+            cartItemAddedEvent = new CartItemAddedV2Event(itemId, product.getId(), product.getName(),
+                    new PriceWithCurrency(product.getPrice(), product.getCurrency()));
 
             eventClient.emit(mapStreamName(cartId), cartItemAddedEvent.toStoreEvent(cartId));
         } else {

@@ -43,9 +43,14 @@ public class Cart {
                 this.items.removeIf(item -> item.id().equals(cartItemRemovedEvent.itemId()));
             }
 
-            default -> {
-                throw new IllegalArgumentException("Unknown event type: " +
-                        event.getClass().getName());
+            case CartItemAddedV2Event cartItemAddedV2Event -> {
+                // Add the item to the cart
+                CartItem newItem = new CartItem(cartItemAddedV2Event.itemId(), cartItemAddedV2Event.productId(),
+                        cartItemAddedV2Event.productName(), cartItemAddedV2Event.productPrice().price(),
+                        cartItemAddedV2Event.productPrice().currency());
+
+                this.items.add(newItem);
+
             }
 
         }
