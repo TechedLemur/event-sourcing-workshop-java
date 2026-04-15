@@ -31,12 +31,16 @@ public class Cart {
     public Cart applyEvent(CartEvent event) {
         switch (event) {
             case CartItemAddedEvent cartItemAddedEvent -> {
-                // TODO: Add the item to the cart
+                // Add the item to the cart
+                CartItem newItem = new CartItem(cartItemAddedEvent.itemId(), cartItemAddedEvent.productId(),
+                        cartItemAddedEvent.productName(), cartItemAddedEvent.productPrice(), null);
+
+                this.items.add(newItem);
 
             }
             case CartItemRemovedEvent cartItemRemovedEvent -> {
-                // TODO: Remove the item from the cart
-
+                // Remove the item from the cart
+                this.items.removeIf(item -> item.id().equals(cartItemRemovedEvent.itemId()));
             }
 
             default -> {
