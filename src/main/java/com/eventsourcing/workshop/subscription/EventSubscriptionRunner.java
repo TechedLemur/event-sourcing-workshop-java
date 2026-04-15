@@ -39,7 +39,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
 
         Optional<Long> checkpoint = Optional.empty();
         // Fetch the checkpoint from the database
-        checkpoint = storageClient.get("checkpoints", "products");
+        checkpoint = storageClient.get(Bucket.CHECKPOINTS, "products");
 
         logger.info("Starting product subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
@@ -53,7 +53,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 productServiceV2.handleProductEvent(subject, event);
 
                 // Save the checkpoint to the database
-                storageClient.put("checkpoints", "products", revision);
+                storageClient.put(Bucket.CHECKPOINTS, "products", revision);
             }
         };
 
@@ -70,7 +70,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
 
         Optional<Long> checkpoint = Optional.empty();
         // Fetch the checkpoint from the database
-        checkpoint = storageClient.get("checkpoints", "carts");
+        checkpoint = storageClient.get(Bucket.CHECKPOINTS, "carts");
 
         logger.info("Starting cart subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
@@ -84,7 +84,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 cartServiceV2.handleCartEvent(subject, event);
 
                 // Save the checkpoint to the database
-                storageClient.put("checkpoints", "carts", revision);
+                storageClient.put(Bucket.CHECKPOINTS, "carts", revision);
             }
         };
 

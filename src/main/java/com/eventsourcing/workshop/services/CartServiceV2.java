@@ -3,6 +3,7 @@ package com.eventsourcing.workshop.services;
 import com.eventsourcing.workshop.clients.EventClient;
 import com.eventsourcing.workshop.clients.StorageClient;
 import com.eventsourcing.workshop.events.*;
+import com.eventsourcing.workshop.models.Bucket;
 import com.eventsourcing.workshop.models.Cart;
 import org.springframework.stereotype.Component;
 
@@ -20,19 +21,19 @@ public class CartServiceV2 extends CartService {
     // Part 3
     public void handleCartEvent(String id, CartEvent event) {
         // Fetch the cart from the database
-        Cart cart = (Cart) storageClient.get("carts", id).orElse(new Cart(id));
+        Cart cart = storageClient.get(Bucket.CARTS, id).orElse(new Cart(id));
 
         // Apply the event to the cart
         cart.applyEvent(event);
 
         // Save the cart to the database
-        storageClient.put("carts", id, cart);
+        storageClient.put(Bucket.CARTS, id, cart);
     }
 
     // Part 3
     @Override
     public Optional<Cart> getCart(String id) {
         // Fetch the cart from the database
-        return storageClient.get("carts", id);
+        return storageClient.get(Bucket.CARTS, id);
     }
 }
