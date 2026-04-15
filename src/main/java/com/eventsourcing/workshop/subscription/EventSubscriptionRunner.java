@@ -5,6 +5,7 @@ import com.eventsourcing.workshop.clients.EventListener;
 import com.eventsourcing.workshop.clients.StorageClient;
 import com.eventsourcing.workshop.events.CartEvent;
 import com.eventsourcing.workshop.events.ProductEvent;
+import com.eventsourcing.workshop.models.Bucket;
 import com.eventsourcing.workshop.services.CartService;
 import com.eventsourcing.workshop.services.CartServiceV2;
 import com.eventsourcing.workshop.services.ProductServiceV2;
@@ -44,7 +45,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
         logger.info("Starting product subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
             logger.info("No checkpoint found for products bucket, clearing bucket to ensure db state is consistent");
-            storageClient.clearBucket("products");
+            storageClient.clearBucket(Bucket.PRODUCTS);
         }
         EventListener<ProductEvent> listener = new EventListener<>() {
             @Override
@@ -73,7 +74,7 @@ public class EventSubscriptionRunner implements ApplicationRunner {
         logger.info("Starting cart subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
             logger.info("No checkpoint found for carts bucket, clearing bucket to ensure db state is consistent");
-            storageClient.clearBucket("carts");
+            storageClient.clearBucket(Bucket.CARTS);
         }
         EventListener<CartEvent> listener = new EventListener<>() {
             @Override
