@@ -3,14 +3,16 @@ package com.eventsourcing.workshop.clients;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.eventsourcing.workshop.models.Bucket;
+
 public interface StorageClient {
-    <T> void put(String bucket, String id, T value);
+    <T> void put(Bucket<T> bucket, String id, T value);
 
-    <T> Optional<T> get(String bucket, String id);
+    <T> Optional<T> get(Bucket<T> bucket, String id);
 
-    <T> Optional<T> delete(String bucket, String id);
+    <T> Optional<T> delete(Bucket<T> bucket, String id);
 
-    <T> Collection<T> list(String bucket);
+    <T> Collection<T> list(Bucket<T> bucket);
 
-    void clearBucket(String bucket);
+    void clearBucket(Bucket<?> bucket);
 }
