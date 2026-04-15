@@ -19,19 +19,20 @@ public class CartServiceV2 extends CartService {
 
     // Part 3
     public void handleCartEvent(String id, CartEvent event) {
-        // TODO: Fetch the cart from the database
-        // Cart cart = ...
+        // Fetch the cart from the database
+        Cart cart = (Cart) storageClient.get("carts", id).orElse(new Cart(id));
 
-        // TODO: Apply the event to the cart
+        // Apply the event to the cart
+        cart.applyEvent(event);
 
-        // TODO: Save the cart to the database
+        // Save the cart to the database
+        storageClient.put("carts", id, cart);
     }
 
     // Part 3
     @Override
     public Optional<Cart> getCart(String id) {
-        // TODO: Fetch the cart from the database instead of returning empty
-
-        return Optional.empty();
+        // Fetch the cart from the database
+        return storageClient.get("carts", id);
     }
 }

@@ -35,11 +35,10 @@ public class EventSubscriptionRunner implements ApplicationRunner {
     }
 
     private void startProductSubscription() {
-        StorageClient storageWrapper = this.storageClient;
 
         Optional<Long> checkpoint = Optional.empty();
-        // TODO: Fetch the checkpoint from the database
-        // checkpoint = ...
+        // Fetch the checkpoint from the database
+        checkpoint = storageClient.get("checkpoints", "products");
 
         logger.info("Starting product subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
@@ -52,23 +51,25 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 logger.info("New product event gotten %s %s%n".formatted(revision, event));
                 productServiceV2.handleProductEvent(subject, event);
 
-                // TODO: Save the checkpoint to the database
+                // Save the checkpoint to the database
+                storageClient.put("checkpoints", "products", revision);
             }
         };
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get().fromStart();
-        // TODO: Set the fromRevision parameter if a checkpoint exists
-        // options = ...
+        // Set the fromRevision parameter if a checkpoint exists
+        if (checkpoint.isPresent()) {
+            options = options.fromRevision(checkpoint.get());
+        }
 
         this.eventClient.subscribe(ProductServiceV2.PRODUCT_AGGREGATION_STREAM, ProductEvent.class, listener, options);
     }
 
     private void startCartSubscription() {
-        StorageClient storageWrapper = this.storageClient;
 
         Optional<Long> checkpoint = Optional.empty();
-        // TODO: Fetch the checkpoint from the database
-        // checkpoint = ...
+        // Fetch the checkpoint from the database
+        checkpoint = storageClient.get("checkpoints", "carts");
 
         logger.info("Starting cart subscription from checkpoint %s".formatted(checkpoint));
         if (checkpoint.isEmpty()) {
@@ -81,13 +82,16 @@ public class EventSubscriptionRunner implements ApplicationRunner {
                 logger.info("New cart event gotten %s %s%n".formatted(revision, event));
                 cartServiceV2.handleCartEvent(subject, event);
 
-                // TODO: Save the checkpoint to the database
+                // Save the checkpoint to the database
+                storageClient.put("checkpoints", "carts", revision);
             }
         };
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get().fromStart();
-        // TODO: Set the fromRevision parameter if a checkpoint exists
-        // options = ...
+        // Set the fromRevision parameter if a checkpoint exists
+        if (checkpoint.isPresent()) {
+            options = options.fromRevision(checkpoint.get());
+        }
 
         this.eventClient.subscribe(CartService.CART_AGGREGATION_STREAM, CartEvent.class, listener, options);
     }
