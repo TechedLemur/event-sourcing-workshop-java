@@ -1,5 +1,6 @@
 package com.eventsourcing.workshop.clients;
 
+import com.eventsourcing.workshop.models.Bucket;
 import com.eventsourcing.workshop.models.Cart;
 import com.eventsourcing.workshop.models.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,20 +21,20 @@ class FileStorageClientTest {
         FileStorageClient client = new FileStorageClient(mapper, file.toString());
 
         Cart cart = new Cart("c1");
-        client.put("carts", "c1", cart);
-        assertTrue(client.get("carts", "c1").isPresent());
-        assertEquals("c1", client.get("carts", "c1").map(Cart.class::cast).orElseThrow().getId());
+        client.put(Bucket.CARTS, "c1", cart);
+        assertTrue(client.get(Bucket.CARTS, "c1").isPresent());
+        assertEquals("c1", client.get(Bucket.CARTS, "c1").map(Cart.class::cast).orElseThrow().getId());
 
         Product p = new Product("p1");
-        client.put("products", "p1", p);
-        assertEquals("p1", client.get("products", "p1").map(Product.class::cast).orElseThrow().getId());
+        client.put(Bucket.PRODUCTS, "p1", p);
+        assertEquals("p1", client.get(Bucket.PRODUCTS, "p1").map(Product.class::cast).orElseThrow().getId());
 
-        client.put("checkpoints", "products", 42L);
-        assertEquals(42L, client.get("checkpoints", "products").orElseThrow());
+        client.put(Bucket.CHECKPOINTS, "products", 42L);
+        assertEquals(42L, client.get(Bucket.CHECKPOINTS, "products").orElseThrow());
 
         // Reload from disk
         FileStorageClient client2 = new FileStorageClient(mapper, file.toString());
-        assertEquals(42L, client2.get("checkpoints", "products").orElseThrow());
-        assertEquals("c1", client2.get("carts", "c1").map(Cart.class::cast).orElseThrow().getId());
+        assertEquals(42L, client2.get(Bucket.CHECKPOINTS, "products").orElseThrow());
+        assertEquals("c1", client2.get(Bucket.CARTS, "c1").map(Cart.class::cast).orElseThrow().getId());
     }
 }

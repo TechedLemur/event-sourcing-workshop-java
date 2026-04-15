@@ -1,7 +1,6 @@
 package com.eventsourcing.workshop.clients;
 
-import com.eventsourcing.workshop.models.Cart;
-import com.eventsourcing.workshop.models.Product;
+import com.eventsourcing.workshop.models.Bucket;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -73,21 +72,16 @@ public final class FileStorageClient implements StorageClient {
         }
     }
 
-    private JavaType valueType(String bucket) {
-        return switch (bucket) {
-            case "carts" -> objectMapper.constructType(Cart.class);
-            case "products" -> objectMapper.constructType(Product.class);
-            case "checkpoints" -> objectMapper.constructType(Long.class);
-            default -> objectMapper.constructType(JsonNode.class);
-        };
+    private JavaType valueType(Bucket<?> bucket) {
+        return objectMapper.constructType(bucket.getType());
     }
 
     @Override
-    public <T> void put(String bucket, String id, T value) {
+    public <T> void put(Bucket<T> bucket, String id, T value) {
         JsonNode node = objectMapper.valueToTree(value);
         lock.writeLock().lock();
         try {
-            data.computeIfAbsent(bucket, b -> new LinkedHashMap<>()).put(id, node);
+            data.computeIfAbsent(bucket.getKey(), b -> new LinkedHashMap<>()).put(id, node);
             persistLocked();
         } finally {
             lock.writeLock().unlock();
@@ -96,10 +90,10 @@ public final class FileStorageClient implements StorageClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> get(String bucket, String id) {
+    public <T> Optional<T> get(Bucket<T> bucket, String id) {
         lock.readLock().lock();
         try {
-            Map<String, JsonNode> bucketMap = data.get(bucket);
+            Map<String, JsonNode> bucketMap = data.get(bucket.getKey());
             if (bucketMap == null) {
                 return Optional.empty();
             }
@@ -116,10 +110,10 @@ public final class FileStorageClient implements StorageClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> delete(String bucket, String id) {
+    public <T> Optional<T> delete(Bucket<T> bucket, String id) {
         lock.writeLock().lock();
         try {
-            Map<String, JsonNode> bucketMap = data.get(bucket);
+            Map<String, JsonNode> bucketMap = data.get(bucket.getKey());
             if (bucketMap == null) {
                 return Optional.empty();
             }
@@ -128,7 +122,7 @@ public final class FileStorageClient implements StorageClient {
                 return Optional.empty();
             }
             if (bucketMap.isEmpty()) {
-                data.remove(bucket);
+                data.remove(bucket.getKey());
             }
             persistLocked();
             Object converted = objectMapper.convertValue(removed, valueType(bucket));
@@ -140,10 +134,10 @@ public final class FileStorageClient implements StorageClient {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Collection<T> list(String bucket) {
+    public <T> Collection<T> list(Bucket<T> bucket) {
         lock.readLock().lock();
         try {
-            Map<String, JsonNode> bucketMap = data.get(bucket);
+            Map<String, JsonNode> bucketMap = data.get(bucket.getKey());
             if (bucketMap == null || bucketMap.isEmpty()) {
                 return List.of();
             }
@@ -159,10 +153,10 @@ public final class FileStorageClient implements StorageClient {
     }
 
     @Override
-    public void clearBucket(String bucket) {
+    public void clearBucket(Bucket<?> bucket) {
         lock.writeLock().lock();
         try {
-            data.remove(bucket);
+            data.remove(bucket.getKey());
         } finally {
             lock.writeLock().unlock();
         }
