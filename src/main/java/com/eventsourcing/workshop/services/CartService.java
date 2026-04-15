@@ -40,16 +40,16 @@ public class CartService {
     public void addItemToCart(String cartId, String productId) {
 
         Optional<Product> optionalProduct = Optional.empty();
-        // TODO: Fetch the product information by productId
-        // optionalProduct =
+        // Fetch the product information by productId
+        optionalProduct = productService.getProduct(productId);
 
         UUID itemId = UUID.randomUUID();
 
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             CartItemAddedEvent cartItemAddedEvent = null;
-            // TODO: Create a new CartItemAddedEvent
-            // cartItemAddedEvent = ...
+            // Create a new CartItemAddedEvent
+            cartItemAddedEvent = new CartItemAddedEvent(itemId, product.getId(), product.getName(), product.getPrice());
 
             eventClient.emit(mapStreamName(cartId), cartItemAddedEvent.toStoreEvent(cartId));
         } else {
@@ -61,8 +61,8 @@ public class CartService {
     // Part 1
     public void removeItemFromCart(String cartId, UUID itemId) {
         CartItemRemovedEvent cartItemRemovedEvent = null;
-        // TODO: Create a new CartItemRemovedEvent
-        // cartItemRemovedEvent = ...
+        // Create a new CartItemRemovedEvent
+        cartItemRemovedEvent = new CartItemRemovedEvent(itemId);
 
         eventClient.emit(mapStreamName(cartId), cartItemRemovedEvent.toStoreEvent(cartId));
     }
