@@ -27,7 +27,7 @@ public class ExampleController {
 
     @PostMapping
     public void createHelloEvent() {
-        eventClient.emit(EXAMPLE_STREAM, new HelloEvent("Hello, javaBin!").toStoreEvent("my-subject"));
+        eventClient.emit(EXAMPLE_STREAM, new HelloEvent("Hello, JavaZone!").toStoreEvent("my-subject"));
     }
 
     @GetMapping
